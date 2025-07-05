@@ -20,12 +20,13 @@ async function main() {
     logger.info(colors.green('🚀 Database connected successfully'));
 
     //Seed Super Admin after database connection is successful
-    await seedSuperAdmin();
+    // await seedSuperAdmin();
 
     const port =
       typeof config.port === 'number' ? config.port : Number(config.port);
 
     server = app.listen(port, config.ip_address as string, () => {
+      console.log(`🚀 Server listening on  http://${config.ip_address}:${port}`);
       logger.info(
         colors.yellow(`♻️  Application listening on port:${config.port}`)
       );
@@ -42,7 +43,9 @@ async function main() {
     //@ts-ignore
     global.io = io;
   } catch (error) {
-    // errorLogger.error(colors.red('🤢 Failed to connect Database'));
+    console.log(error);
+    
+    errorLogger.error(colors.red('🤢 Failed to connect Database'));
   }
 
   //handle unhandleRejection

@@ -31,7 +31,7 @@ const userSchema = new Schema<IUser, UserModal>(
     },
     image: {
       type: String,
-      default: 'https://i.ibb.co/z5YHLV9/profile.png',
+      default: 'https://res.cloudinary.com/dbq7y6byo/image/upload/v1750680842/avatars/user_itpwmf.jpg',
     },
     status: {
       type: String,
