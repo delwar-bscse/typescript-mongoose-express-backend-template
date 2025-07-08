@@ -30,7 +30,7 @@ router.post(
   AuthController.resetPassword
 );
 
-router.post(
+router.patch(
   '/change-password',
   auth(USER_ROLES.ADMIN, USER_ROLES.USER),
   validateRequest(AuthValidation.createChangePasswordZodSchema),

@@ -85,7 +85,10 @@ const forgetPasswordToDB = async (email: string) => {
 
 //verify email
 const verifyEmailToDB = async (payload: IVerifyEmail) => {
-  const { email, oneTimeCode } = payload;
+  // const { email, oneTimeCode } = payload;
+  const email = payload?.email;
+  const oneTimeCode = Number(payload?.oneTimeCode);
+
   const isExistUser = await User.findOne({ email }).select('+authentication');
   if (!isExistUser) {
     throw new ApiError(StatusCodes.BAD_REQUEST, "User doesn't exist!");
@@ -118,7 +121,7 @@ const verifyEmailToDB = async (payload: IVerifyEmail) => {
       { _id: isExistUser._id },
       { verified: true, authentication: { oneTimeCode: null, expireAt: null } }
     );
-    message = 'Email verify successfully';
+    message = 'Email verified successfully';
   } else {
     await User.findOneAndUpdate(
       { _id: isExistUser._id },
