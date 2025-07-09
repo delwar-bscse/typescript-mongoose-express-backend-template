@@ -15,13 +15,24 @@ router.post(
 router.post(
   '/forget-password',
   validateRequest(AuthValidation.createForgetPasswordZodSchema),
-  AuthController.forgetPassword
+  AuthController.sendOtp
+);
+router.post(
+  '/resend-otp',
+  validateRequest(AuthValidation.createForgetPasswordZodSchema),
+  AuthController.sendOtp
 );
 
 router.post(
-  '/verify-email',
+  '/verify-account',
   validateRequest(AuthValidation.createVerifyEmailZodSchema),
-  AuthController.verifyEmail
+  AuthController.verifyAccount
+);
+
+router.post(
+  '/verify-otp',
+  validateRequest(AuthValidation.createVerifyEmailZodSchema),
+  AuthController.verifyOtp
 );
 
 router.post(

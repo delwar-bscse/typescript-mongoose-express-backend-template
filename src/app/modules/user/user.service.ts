@@ -8,13 +8,32 @@ import unlinkFile from '../../../shared/unlinkFile';
 import generateOTP from '../../../util/generateOTP';
 import { IUser } from './user.interface';
 import { User } from './user.model';
+import e from 'cors';
 
-const createUserToDB = async (payload: Partial<IUser>): Promise<IUser> => {
-  //set role
+const createUserToDB = async (payload: Partial<IUser>): Promise<string> => {
   payload.role = USER_ROLES.USER;
-  const createUser = await User.create(payload);
-  if (!createUser) {
-    throw new ApiError(StatusCodes.BAD_REQUEST, 'Failed to create user');
+  let message = '';
+  let createUser: IUser = {} as IUser;
+
+  const isExistUser = await User.findOne({ email: payload.email });
+
+  if (isExistUser?.verified) {
+    return "User already exist! Please Login";
+  }
+
+  if (isExistUser && !isExistUser?.verified) {
+    createUser = isExistUser;
+    message = "User already exist! Please verify your account";
+  }
+
+  if (!isExistUser) {
+    const res = await User.create(payload);
+    if (res) {
+      createUser = res;
+      message = 'User created successfully! Please verify your account';
+    } else {
+      throw new ApiError(StatusCodes.BAD_REQUEST, 'Failed to create user');
+    }
   }
 
   //send email
@@ -30,15 +49,16 @@ const createUserToDB = async (payload: Partial<IUser>): Promise<IUser> => {
   //save to DB
   const authentication = {
     oneTimeCode: otp,
-    expireAt: new Date(Date.now() + 3 * 60000),
+    expireAt: new Date(Date.now() + 1 * 60 * 1000),
   };
   await User.findOneAndUpdate(
-    { _id: createUser._id },
+    { email: createUser.email },
     { $set: { authentication } }
   );
 
-  return createUser;
+  return message;
 };
+
 
 const getUserProfileFromDB = async (
   user: JwtPayload

@@ -60,7 +60,7 @@ const loginUserFromDB = async (payload: ILoginData) => {
 };
 
 //forget password
-const forgetPasswordToDB = async (email: string) => {
+const sendOtpToDB = async (email: string) => {
   const isExistUser = await User.isExistUserByEmail(email);
   if (!isExistUser) {
     throw new ApiError(StatusCodes.BAD_REQUEST, "User doesn't exist!");
@@ -72,7 +72,7 @@ const forgetPasswordToDB = async (email: string) => {
     otp,
     email: isExistUser.email,
   };
-  const forgetPassword = emailTemplate.resetPassword(value);
+  const forgetPassword = emailTemplate.sendOtp(value);
   emailHelper.sendEmail(forgetPassword);
 
   //save to DB
@@ -84,7 +84,64 @@ const forgetPasswordToDB = async (email: string) => {
 };
 
 //verify email
-const verifyEmailToDB = async (payload: IVerifyEmail) => {
+const verifyAccountToDB = async (payload: IVerifyEmail) => {
+  let message;
+  let data = "";
+  // const { email, oneTimeCode } = payload;
+  const email = payload?.email;
+  const oneTimeCode = Number(payload?.oneTimeCode);
+
+  const isExistUser = await User.findOne({ email }).select('+authentication');
+
+  if (!isExistUser) {
+    throw new ApiError(StatusCodes.BAD_REQUEST, "User doesn't exist!");
+  }
+  if (isExistUser.verified) {
+    await User.findOneAndUpdate(
+      { _id: isExistUser._id },
+      { verified: true, authentication: { oneTimeCode: null, expireAt: null } }
+    );
+    message = 'Account already verified! You can login now';
+    return { message, data };
+  }
+
+  if (!oneTimeCode) {
+    throw new ApiError(
+      StatusCodes.BAD_REQUEST,
+      'Please give the otp, check your email we send a code'
+    );
+  }
+
+  if (isExistUser?.authentication?.oneTimeCode !== oneTimeCode) {
+    throw new ApiError(StatusCodes.BAD_REQUEST, 'Otp is incorrect, Please try again');
+  }
+
+  const date = new Date();
+  if (date > isExistUser.authentication?.expireAt) {
+    throw new ApiError(
+      StatusCodes.BAD_REQUEST,
+      'Otp already expired, Please try again'
+    );
+  }
+
+  if (!isExistUser.verified) {
+    await User.findOneAndUpdate(
+      { _id: isExistUser._id },
+      { verified: true, authentication: { oneTimeCode: null, expireAt: null } }
+    );
+    message = 'Account verified successfully! You can login now';
+  } else {
+    await User.findOneAndUpdate(
+      { _id: isExistUser._id },
+      { authentication: { oneTimeCode: null, expireAt: null } }
+    );
+    message = 'Account already verified! You can login now';
+  }
+  return { data, message };
+};
+
+//verify email
+const verifyOtpToDB = async (payload: IVerifyEmail) => {
   // const { email, oneTimeCode } = payload;
   const email = payload?.email;
   const oneTimeCode = Number(payload?.oneTimeCode);
@@ -251,9 +308,10 @@ const changePasswordToDB = async (
 };
 
 export const AuthService = {
-  verifyEmailToDB,
+  verifyAccountToDB,
+  verifyOtpToDB,
   loginUserFromDB,
-  forgetPasswordToDB,
+  sendOtpToDB,
   resetPasswordToDB,
   changePasswordToDB,
 };
