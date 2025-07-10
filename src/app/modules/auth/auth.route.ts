@@ -24,6 +24,12 @@ router.post(
 );
 
 router.post(
+  '/send-otp',
+  validateRequest(AuthValidation.createForgetPasswordZodSchema),
+  AuthController.sendOtp
+);
+
+router.post(
   '/verify-account',
   validateRequest(AuthValidation.createVerifyEmailZodSchema),
   AuthController.verifyAccount

@@ -6,16 +6,17 @@ import { emailHelper } from '../../../helpers/emailHelper';
 import { emailTemplate } from '../../../shared/emailTemplate';
 import unlinkFile from '../../../shared/unlinkFile';
 import generateOTP from '../../../util/generateOTP';
-import { IUser } from './user.interface';
+import { IUser, PartialUserWithRequiredEmail } from './user.interface';
 import { User } from './user.model';
 import e from 'cors';
 
-const createUserToDB = async (payload: Partial<IUser>): Promise<string> => {
+const createUserToDB = async (payload: PartialUserWithRequiredEmail): Promise<string> => {
+
   payload.role = USER_ROLES.USER;
   let message = '';
   let createUser: IUser = {} as IUser;
 
-  const isExistUser = await User.findOne({ email: payload.email });
+  const isExistUser = await User.isExistUserByEmail(payload?.email);
 
   if (isExistUser?.verified) {
     return "User already exist! Please Login";

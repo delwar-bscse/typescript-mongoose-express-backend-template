@@ -78,9 +78,11 @@ const sendOtpToDB = async (email: string) => {
   //save to DB
   const authentication = {
     oneTimeCode: otp,
-    expireAt: new Date(Date.now() + 3 * 60000),
+    expireAt: new Date(Date.now() + 1 * 60 * 1000),
   };
-  await User.findOneAndUpdate({ email }, { $set: { authentication } });
+  await User.findOneAndUpdate(
+    { email }, 
+    { $set: { authentication } });
 };
 
 //verify email

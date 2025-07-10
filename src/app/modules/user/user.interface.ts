@@ -18,6 +18,9 @@ export type IUser = {
   };
 };
 
+export type PartialUserWithRequiredEmail = Partial<Omit<IUser, 'email'>> & Pick<IUser, 'email'>;
+
+
 export type UserModal = {
   isExistUserById(id: string): any;
   isExistUserByEmail(email: string): any;

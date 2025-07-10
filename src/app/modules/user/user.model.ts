@@ -22,12 +22,22 @@ const userSchema = new Schema<IUser, UserModal>(
       required: true,
       unique: true,
       lowercase: true,
+      trim: true,
     },
     password: {
       type: String,
       required: true,
       select: 0,
       minlength: 8,
+    },
+    contact: {
+      type: String,
+      required: true,
+      unique: true,
+    },
+    location: {
+      type: String,
+      required: true,
     },
     image: {
       type: String,
