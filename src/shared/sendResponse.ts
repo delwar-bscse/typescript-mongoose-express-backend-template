@@ -9,8 +9,6 @@ type IData<T> = {
     limit: number;
     totalPage: number;
     total: number;
-    sortBy: string;
-    sortOrder: string;
   };
   data?: T;
 };

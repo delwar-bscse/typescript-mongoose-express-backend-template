@@ -62,22 +62,20 @@ const getUsers = catchAsync(async (req: Request, res: Response) => {
   const paginationOptions: IPaginationOptions = {
     page: req.query.page ? Number(req.query.page) : 1,
     limit: req.query.limit ? Number(req.query.limit) : 10,
-    totalPage: 0,
-    total: 0,
     sortBy: req.query.sortBy as string,
     sortOrder: req.query.sortOrder as 'asc' | 'desc',
   };
 
   // 4. Call service
-  const result = await UserService.getUsersFromDB(filters, paginationOptions);
+  const { meta, data } = await UserService.getUsersFromDB(filters, paginationOptions);
 
   // 5. Send response
   sendResponse(res, {
     success: true,
     statusCode: StatusCodes.OK,
     message: 'Users retrieved successfully',
-    data: result.data,
-    pagination: result.meta,
+    data: data,
+    pagination: meta,
   });
 });
 
