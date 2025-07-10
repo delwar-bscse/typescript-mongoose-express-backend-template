@@ -54,7 +54,7 @@ const userSchema = new Schema<IUser, UserModal>(
     },
     authentication: {
       type: {
-        isResetPassword: {
+        isSendOtp: {
           type: Boolean,
           default: false,
         },

@@ -23,3 +23,15 @@ export const seedSuperAdmin = async () => {
     logger.info('✨ Super Admin account has been successfully created!');
   }
 };
+
+/*
+{
+  name: 'Hasan Mahmud',
+  email: 'hasan@gmail.com',
+  role: "user",
+  password: 'bangladesh',
+  location: 'Dhaka, Bangladesh',
+  contact: '+8801821686470',
+  verified: true,
+}
+*/

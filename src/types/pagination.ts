@@ -3,4 +3,6 @@ export type IPaginationOptions = {
   limit?: number;
   sortBy?: string;
   sortOrder?: 'asc' | 'desc';
+  totalPage?: number;
+  total?: number;
 };

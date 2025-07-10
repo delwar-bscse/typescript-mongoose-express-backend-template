@@ -186,7 +186,7 @@ const verifyOtpToDB = async (payload: IVerifyEmail) => {
       { _id: isExistUser._id },
       {
         authentication: {
-          isResetPassword: true,
+          isSendOtp: true,
           oneTimeCode: null,
           expireAt: null,
         },
@@ -223,7 +223,7 @@ const resetPasswordToDB = async (
   const isExistUser = await User.findById(isExistToken.user).select(
     '+authentication'
   );
-  if (!isExistUser?.authentication?.isResetPassword) {
+  if (!isExistUser?.authentication?.isSendOtp) {
     throw new ApiError(
       StatusCodes.UNAUTHORIZED,
       "You don't have permission to change the password. Please click again to 'Forgot Password'"
@@ -255,7 +255,7 @@ const resetPasswordToDB = async (
   const updateData = {
     password: hashPassword,
     authentication: {
-      isResetPassword: false,
+      isSendOtp: false,
     },
   };
 

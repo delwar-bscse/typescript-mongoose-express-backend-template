@@ -9,6 +9,8 @@ import generateOTP from '../../../util/generateOTP';
 import { IUser, PartialUserWithRequiredEmail } from './user.interface';
 import { User } from './user.model';
 import e from 'cors';
+import { IPaginationOptions } from '../../../types/pagination';
+import QueryBuilder from '../../builder/QueryBuilder';
 
 const createUserToDB = async (payload: PartialUserWithRequiredEmail): Promise<string> => {
 
@@ -60,6 +62,42 @@ const createUserToDB = async (payload: PartialUserWithRequiredEmail): Promise<st
   return message;
 };
 
+const createUsersToDB = async (
+  payloads: PartialUserWithRequiredEmail[]
+): Promise<string[]> => {
+
+  const messages: string[] = [];
+
+  for (const payload of payloads) {
+    if (!payload.email) {
+      messages.push('Missing email in payload.');
+      continue;
+    }
+
+    payload.role = USER_ROLES.USER;
+
+    const isExistUser = await User.isExistUserByEmail(payload.email);
+
+    if (isExistUser) {
+      messages.push(`User with ${payload.email} already exists!`);
+    } else {
+      try {
+        const res = await User.create(payload);
+        if (res) {
+          messages.push(`User with ${payload.email} created successfully!`);
+        } else {
+          messages.push(`Failed to create user with ${payload.email}`);
+        }
+      } catch (error: any) {
+        messages.push(`Error creating user ${payload.email}: ${error.message}`);
+      }
+    }
+  }
+
+  return messages;
+};
+
+
 
 const getUserProfileFromDB = async (
   user: JwtPayload
@@ -71,6 +109,36 @@ const getUserProfileFromDB = async (
   }
 
   return isExistUser;
+};
+
+const getUsersFromDB = async (
+  filters: Record<string, unknown>,
+  paginationOptions: IPaginationOptions
+): Promise<{ meta: IPaginationOptions; data: Partial<IUser>[] }> => {
+  const { page = 1, limit = 10, sortBy = 'createdAt', sortOrder = 'desc', total=0, totalPage=0 } = paginationOptions;
+
+  const query: Record<string, unknown> = {
+    ...filters,
+    page,
+    limit,
+    sort: `${sortOrder === 'desc' ? '-' : ''}${sortBy}`,
+  };
+
+  const searchableFields = ['name', 'email', 'location', 'contact'];
+
+  const builder = new QueryBuilder<IUser>(User.find(), query);
+
+  const usersQuery = builder
+    .search(searchableFields)
+    .filter()
+    .sort()
+    .paginate()
+    .fields();
+
+  const data = await usersQuery.modelQuery.lean();
+  const meta = await builder.getPaginationInfo();
+
+  return { meta, data };
 };
 
 const updateProfileToDB = async (
@@ -97,6 +165,8 @@ const updateProfileToDB = async (
 
 export const UserService = {
   createUserToDB,
+  createUsersToDB,
   getUserProfileFromDB,
+  getUsersFromDB,
   updateProfileToDB,
 };

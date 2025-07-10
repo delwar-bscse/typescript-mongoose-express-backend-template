@@ -30,4 +30,17 @@ router
     UserController.createUser
   );
 
+router
+  .route('/users')
+  .post(
+    auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.ADMIN),
+    UserController.createUsers
+  )
+  .get(
+    auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.ADMIN),
+    UserController.getUsers
+  );
+
+
+
 export const UserRoutes = router;

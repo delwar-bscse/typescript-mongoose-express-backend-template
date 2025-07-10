@@ -3,12 +3,14 @@ import { Response } from 'express';
 type IData<T> = {
   success: boolean;
   statusCode: number;
-  message?: string;
+  message?: string | string[];
   pagination?: {
     page: number;
     limit: number;
     totalPage: number;
     total: number;
+    sortBy: string;
+    sortOrder: string;
   };
   data?: T;
 };

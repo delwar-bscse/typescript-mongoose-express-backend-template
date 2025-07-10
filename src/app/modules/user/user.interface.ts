@@ -12,7 +12,7 @@ export type IUser = {
   status: 'active' | 'delete';
   verified: boolean;
   authentication?: {
-    isResetPassword: boolean;
+    isSendOtp: boolean;
     oneTimeCode: number;
     expireAt: Date;
   };
