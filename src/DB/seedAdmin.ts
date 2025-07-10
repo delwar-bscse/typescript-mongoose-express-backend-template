@@ -8,6 +8,8 @@ const payload = {
   email: config.super_admin.email,
   role: USER_ROLES.SUPER_ADMIN,
   password: config.super_admin.password,
+  location: 'Dhaka, Bangladesh',
+  contact: '+8801821686470',
   verified: true,
 };
 

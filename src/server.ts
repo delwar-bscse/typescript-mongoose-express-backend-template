@@ -19,13 +19,12 @@ async function main() {
     await mongoose.connect(config.database_url as string);
     logger.info(colors.green('🚀 Database connected successfully'));
 
-    //Seed Super Admin after database connection is successful
-    // await seedSuperAdmin();
-
-    const port =
-      typeof config.port === 'number' ? config.port : Number(config.port);
-
-    server = app.listen(port, config.ip_address as string, () => {
+    
+    const port = typeof config.port === 'number' ? config.port : Number(config.port);
+    
+    server = app.listen(port, config.ip_address as string, async() => {
+      //Seed Super Admin after database connection is successful
+      await seedSuperAdmin();
       console.log(`🚀 Server listening on  http://${config.ip_address}:${port}`);
       logger.info(
         colors.yellow(`♻️  Application listening on port:${config.port}`)
