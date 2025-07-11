@@ -1,4 +1,4 @@
-import { FilterQuery, Query } from 'mongoose';
+import { FilterQuery, Query, SortOrder } from 'mongoose';
 
 class QueryBuilder<T> {
   public modelQuery: Query<T[], T>;
@@ -15,12 +15,12 @@ class QueryBuilder<T> {
       this.modelQuery = this.modelQuery.find({
         $or: searchableFields.map(
           field =>
-            ({
-              [field]: {
-                $regex: this.query.searchTerm,
-                $options: 'i',
-              },
-            } as FilterQuery<T>)
+          ({
+            [field]: {
+              $regex: this.query.searchTerm,
+              $options: 'i',
+            },
+          } as FilterQuery<T>)
         ),
       });
     }
@@ -31,16 +31,32 @@ class QueryBuilder<T> {
   filter() {
     const queryObj = { ...this.query };
     const excludeFields = ['searchTerm', 'sort', 'page', 'limit', 'fields'];
-    excludeFields.forEach(el => delete queryObj[el]);
+    excludeFields.forEach(element => delete queryObj[element]);
 
     this.modelQuery = this.modelQuery.find(queryObj as FilterQuery<T>);
     return this;
   }
 
+
   //sorting
   sort() {
-    let sort = (this?.query?.sort as string) || '-createdAt';
-    this.modelQuery = this.modelQuery.sort(sort);
+    let sort = (this?.query?.sort as string[]) || ['-createdAt']; // Default sorting by createdAt in descending order.
+
+    // Create an array to store the sorting fields in tuple format.
+    const sortArray: [string, SortOrder][] = [];
+
+    // Loop over the provided sort fields
+    sort.forEach(field => {
+      // Trim the field and check if it starts with "-" (indicating descending)
+      const isDescending = field.trim().startsWith('-');
+      const fieldName = isDescending ? field.slice(1) : field;
+
+      // Push the field name and sort order as a tuple to the sortArray
+      sortArray.push([fieldName, isDescending ? 'desc' : 'asc']);
+    });
+
+    // Apply the sorting using the sortArray
+    this.modelQuery = this.modelQuery.sort(sortArray);
 
     return this;
   }
@@ -56,14 +72,22 @@ class QueryBuilder<T> {
     return this;
   }
 
-  //fields filtering
-  fields() {
-    let fields =
-      (this?.query?.fields as string)?.split(',').join(' ') || '-__v';
-    this.modelQuery = this.modelQuery.select(fields);
+  // fields filtering
+  //"fields": "name,email,location, ...."
+ fields() {
+  let fields =
+    (this?.query?.fields as string)?.split(',').join(' ') || '-__v';
 
-    return this;
+  // Exclude the password field explicitly
+  if (!fields.includes('password')) {
+    fields = fields + ' -password'; // Add `-password` to the projection string to exclude it
   }
+
+  this.modelQuery = this.modelQuery.select(fields);
+
+  return this;
+}
+
 
   //populating
   populate(populateFields: string[], selectFields: Record<string, unknown>) {

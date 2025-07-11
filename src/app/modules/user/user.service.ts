@@ -112,21 +112,37 @@ const getUserProfileFromDB = async (
 };
 
 const getUsersFromDB = async (
-  filters: Record<string, unknown>,
+  filterOptions: Record<string, unknown>,
   paginationOptions: IPaginationOptions
 ): Promise<{ meta: IPaginationOptions; data: Partial<IUser>[] }> => {
-  const { page = 1, limit = 10, sortBy = 'createdAt', sortOrder = 'desc', total=0, totalPage=0 } = paginationOptions;
+  const { page = 1, limit = 10 } = paginationOptions;
 
   const query: Record<string, unknown> = {
-    ...filters,
+    ...filterOptions,
     page,
     limit,
-    sort: `${sortOrder === 'desc' ? '-' : ''}${sortBy}`,
   };
+  console.log("All Queries: ", query);
 
   const searchableFields = ['name', 'email', 'location', 'contact'];
 
   const builder = new QueryBuilder<IUser>(User.find(), query);
+
+  /*
+  const populateFields = ['role', 'createdBy']; // Example populate fields
+  const selectFields = {
+    'role': 'name description',  // Select specific fields for the 'role' document
+    'createdBy': 'name email'    // Select specific fields for the 'createdBy' document
+  };
+
+  const usersQuery = builder
+    .search(searchableFields)
+    .filter()
+    .sort()
+    .paginate()
+    .fields()
+    .populate(populateFields, selectFields);
+  */
 
   const usersQuery = builder
     .search(searchableFields)
