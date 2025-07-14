@@ -19,6 +19,7 @@ const postSchema = new Schema<IPost, IPostModal>(
     },
     image: {
       type: String,
+      required: true,
     },
   },
   { timestamps: true }

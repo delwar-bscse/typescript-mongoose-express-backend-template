@@ -97,8 +97,6 @@ const createUsersToDB = async (
   return messages;
 };
 
-
-
 const getUserProfileFromDB = async (
   user: JwtPayload
 ): Promise<Partial<IUser>> => {
@@ -122,7 +120,7 @@ const getUsersFromDB = async (
     page,
     limit,
   };
-  console.log("All Queries: ", query);
+  // console.log("All Queries: ", query);
 
   const searchableFields = ['name', 'email', 'location', 'contact'];
 

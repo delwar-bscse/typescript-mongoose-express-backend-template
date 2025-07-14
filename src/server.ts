@@ -26,7 +26,7 @@ async function main() {
     server = app.listen(port, config.ip_address as string, async () => {
       // Seed Super Admin after database connection is successful
       await seedSuperAdmin();
-      console.log(`🚀 Server listening on  http://${config.ip_address}:${port}`);
+      // console.log(`🚀 Server listening on  http://${config.ip_address}:${port}`);
       logger.info(
         colors.yellow(`♻️  Application listening on port:${config.port}`)
       );
@@ -43,7 +43,7 @@ async function main() {
     //@ts-ignore
     global.io = io;
   } catch (error) {
-    console.log(error);
+    // console.log(error);
 
     errorLogger.error(colors.red('🤢 Failed to connect Database'));
   }

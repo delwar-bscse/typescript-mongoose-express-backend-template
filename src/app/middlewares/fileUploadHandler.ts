@@ -41,6 +41,7 @@ const fileUploadHandler = () => {
     },
     filename: (req, file, cb) => {
       const fileExt = path.extname(file.originalname);
+      // console.log("fileExt", fileExt);
       const fileName =
         file.originalname
           .replace(fileExt, '')
@@ -100,6 +101,7 @@ const fileUploadHandler = () => {
     { name: 'media', maxCount: 3 },
     { name: 'doc', maxCount: 3 },
   ]);
+  
   return upload;
 };
 
