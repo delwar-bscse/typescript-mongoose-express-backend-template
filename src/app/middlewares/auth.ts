@@ -5,8 +5,7 @@ import config from '../../config';
 import ApiError from '../../errors/ApiError';
 import { jwtHelper } from '../../helpers/jwtHelper';
 
-const auth =
-  (...roles: string[]) =>
+const auth = (...roles: string[]) =>
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const tokenWithBearer = req.headers.authorization;
