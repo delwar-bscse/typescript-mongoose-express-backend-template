@@ -40,7 +40,7 @@ class QueryBuilder<T> {
 
   //sorting
   sort() {
-    let sort = (this?.query?.sort as string[]) || ['-createdAt']; // Default sorting by createdAt in descending order.
+    let sort = (this?.query?.sort as string[]) || ['-createdAt'];
 
     // Create an array to store the sorting fields in tuple format.
     const sortArray: [string, SortOrder][] = [];

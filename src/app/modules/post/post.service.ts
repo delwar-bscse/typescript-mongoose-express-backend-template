@@ -27,7 +27,7 @@ const createPostToDB = async (newData: IPartialPostWithCreatorId): Promise<{ mes
   return { message };
 };
 
-const getSinglePostToDB = async (postId: string): Promise<{ message: string }> => {
+const getSinglePostToDB = async (postId: string): Promise<{data: Partial<IPost> | null, message: string }> => {
 
   let message = '';
 
@@ -43,7 +43,8 @@ const getPostsFromDB = async (
   filterOptions: Record<string, unknown>,
   paginationOptions: IPaginationOptions
 ): Promise<{ pagination: IPaginationOptions; data: Partial<IPost>[] }> => {
-  const { page = 1, limit = 10 } = paginationOptions;
+
+  const { page, limit} = paginationOptions;
 
   const query: Record<string, unknown> = {
     ...filterOptions,
@@ -57,7 +58,7 @@ const getPostsFromDB = async (
   const builder = new QueryBuilder<IPost>(PostModel.find(), query);
 
   
-  const populateFields = ['creatorId']; // Example populate fields
+  const populateFields = ['creatorId'];
   const selectFields = {
     'creatorId': 'name email',
   };
@@ -113,5 +114,5 @@ export const PostService = {
   updatePostToDB,
   getSinglePostToDB,
   deleteSinglePostToDB,
-  getPostsFromDB
+  getPostsFromDB,
 };
