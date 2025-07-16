@@ -8,8 +8,8 @@ morgan.token(
   (req: Request, res: Response) => res?.locals.errorMessage || ''
 );
 
-const getIpFormat = () =>
-  config.node_env === 'development' ? ':remote-addr - ' : '';
+const getIpFormat = () => config.node_env === 'development' ? ':remote-addr - ' : '';
+
 const successResponseFormat = `${getIpFormat()}:method :url :status - :response-time ms`;
 const errorResponseFormat = `${getIpFormat()}:method :url :status - :response-time ms`;
 
