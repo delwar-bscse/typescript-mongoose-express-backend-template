@@ -77,6 +77,32 @@ const getUsers = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const getUsersAggregation = catchAsync(async (req: Request, res: Response) => {
+  // 1. Define which query fields are filters
+  const filterableFields = ['searchTerm', 'verified', 'fields', 'sort'];
+
+  // 2. Pick only allowed filters from req.query
+  const filterOptions = pick(req.query, filterableFields);
+
+  // 3. Build pagination options
+  const paginationOptions: IPaginationOptions = {
+    page: req.query.page ? Number(req.query.page) : 1,
+    limit: req.query.limit ? Number(req.query.limit) : 10,
+  };
+
+  // 4. Call service
+  const { meta, data } = await UserService.getUsersAggregationFromDB(filterOptions, paginationOptions);
+
+  // 5. Send response
+  sendResponse(res, {
+    success: true,
+    statusCode: StatusCodes.OK,
+    message: 'Users retrieved successfully',
+    data: data as Partial<IUser>[] || [],
+    pagination: meta as IPaginationMeta,
+  });
+});
+
 
 //update profile
 const updateProfile = catchAsync(
@@ -99,4 +125,4 @@ const updateProfile = catchAsync(
   }
 );
 
-export const UserController = { createUser, createUsers, getUserProfile, getUsers, updateProfile };
+export const UserController = { createUser, createUsers, getUserProfile, getUsers, updateProfile, getUsersAggregation };

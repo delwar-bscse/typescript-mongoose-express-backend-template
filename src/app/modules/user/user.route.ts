@@ -40,6 +40,13 @@ router
     auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.ADMIN),
     UserController.getUsers
   );
+  
+router
+  .route('/users-aggregation')
+  .get(
+    auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.ADMIN),
+    UserController.getUsersAggregation
+  );
 
 
 

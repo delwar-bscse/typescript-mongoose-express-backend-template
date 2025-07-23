@@ -8,7 +8,6 @@ import unlinkFile from '../../../shared/unlinkFile';
 import generateOTP from '../../../util/generateOTP';
 import { IUser, PartialUserWithRequiredEmail } from './user.interface';
 import { User } from './user.model';
-import e from 'cors';
 import { IPaginationOptions } from '../../../types/pagination';
 import QueryBuilder from '../../builder/QueryBuilder';
 
@@ -126,22 +125,6 @@ const getUsersFromDB = async (
 
   const builder = new QueryBuilder<IUser>(User.find(), query);
 
-  /*
-  const populateFields = ['role', 'createdBy']; // Example populate fields
-  const selectFields = {
-    'role': 'name description',  // Select specific fields for the 'role' document
-    'createdBy': 'name email'    // Select specific fields for the 'createdBy' document
-  };
-
-  const usersQuery = builder
-    .search(searchableFields)
-    .filter()
-    .sort()
-    .paginate()
-    .fields()
-    .populate(populateFields, selectFields);
-  */
-
   const usersQuery = builder
     .search(searchableFields)
     .filter()
@@ -154,6 +137,95 @@ const getUsersFromDB = async (
 
   return { meta, data };
 };
+
+
+const getUsersAggregationFromDB = async (
+  filterOptions: Record<string, unknown>,
+  paginationOptions: IPaginationOptions
+): Promise<{ meta: IPaginationOptions; data: Partial<IUser>[] }> => {
+  const { searchTerm = "", ...otherFilters } = filterOptions;
+  const { page = 1, limit = 10 } = paginationOptions;
+  const skip = (page - 1) * limit;
+
+  const searchableFields = ['name', 'email', 'location', 'contact'];
+  const matchConditions: any = {};
+
+  // Add `$or` condition if `searchTerm` is provided
+  if (searchTerm) {
+    matchConditions.$or = searchableFields.map((field) => ({
+      [field]: { $regex: searchTerm, $options: 'i' },
+    }));
+  }
+
+  const [result] = await User.aggregate([
+    {
+      $match: {
+        $or: [
+          { name: { $regex: searchTerm, $options: 'i' } },
+          { email: { $regex: searchTerm, $options: 'i' } },
+        ],
+      },
+    },
+    {
+      $facet: {
+        data: [
+          { $skip: skip },
+          { $limit: limit },
+          {
+            $project: {
+              name: 1,
+              email: 1,
+            },
+          },
+        ],
+        countData: [
+          { $count: "total" }
+        ],
+      },
+    },
+
+    {
+      $addFields: {
+        total: { $ifNull: [{ $arrayElemAt: ["$countData.total", 0] }, 0] },
+        limit: limit,
+        page: page
+      }
+    },
+    {
+      $addFields: {
+        totalPage: {
+          $ceil: { $divide: ["$total", limit] } // ✅ use plain `limit` (number), not "$limit"
+        }
+      }
+    },
+    {
+      $project: {
+        data: 1,
+        pagination: {
+          total: "$total",
+          limit: "$limit",
+          page: "$page",
+          totalPage: "$totalPage",
+        }
+      }
+    }
+  ]);
+
+  const meta = result?.pagination || {
+    total: 0,
+    limit,
+    page,
+    totalPage: 0,
+  };
+
+  return {
+    meta,
+    data: result?.data || [],
+  };
+};
+
+
+
 
 const updateProfileToDB = async (
   user: JwtPayload,
@@ -183,4 +255,5 @@ export const UserService = {
   getUserProfileFromDB,
   getUsersFromDB,
   updateProfileToDB,
+  getUsersAggregationFromDB
 };
