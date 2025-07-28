@@ -160,11 +160,15 @@ const getUsersAggregationFromDB = async (
   const [result] = await User.aggregate([
     {
       $match: {
-        $or: [
-          { name: { $regex: searchTerm, $options: 'i' } },
-          { email: { $regex: searchTerm, $options: 'i' } },
-        ],
-      },
+        // status: "active",
+      }, // Don’t forget to apply your matchConditions here!
+    },
+    {
+      $group: {
+        _id: "$role",
+        count: { $sum: 1 },
+        users: {$push: "$_id"}
+      }
     },
     {
       $facet: {
@@ -173,8 +177,7 @@ const getUsersAggregationFromDB = async (
           { $limit: limit },
           {
             $project: {
-              name: 1,
-              email: 1,
+              __v: 0,
             },
           },
         ],
@@ -183,18 +186,13 @@ const getUsersAggregationFromDB = async (
         ],
       },
     },
-
     {
       $addFields: {
         total: { $ifNull: [{ $arrayElemAt: ["$countData.total", 0] }, 0] },
         limit: limit,
-        page: page
-      }
-    },
-    {
-      $addFields: {
+        page: page,
         totalPage: {
-          $ceil: { $divide: ["$total", limit] } // ✅ use plain `limit` (number), not "$limit"
+          $ceil: { $divide: [{ $ifNull: [{ $arrayElemAt: ["$countData.total", 0] }, 0] }, limit] }
         }
       }
     },
